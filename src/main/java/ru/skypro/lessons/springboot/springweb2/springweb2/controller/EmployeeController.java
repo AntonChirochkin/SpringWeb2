@@ -1,9 +1,7 @@
 package ru.skypro.lessons.springboot.springweb2.springweb2.controller;
 
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.skypro.lessons.springboot.springweb2.springweb2.delo.Employee;
 import ru.skypro.lessons.springboot.springweb2.springweb2.service.EmployeeService;
 
@@ -34,5 +32,31 @@ public class EmployeeController {
     @GetMapping("/high-salary")
     public List<Employee> getEmployeeWithSalaryHigherThanAverage() {
         return employeeService.getEmployeeWithSalaryHigherThanAverage();
+    }
+
+    // Создание множества новых сотрудников
+    @PostMapping
+    public List<Employee> createManyEmployee(@RequestBody List<Employee> employeeList){
+      return employeeService.createManyEmployee(employeeList);
+    }
+    // Редактирование сотрудника с указанным id;
+    @PutMapping("/{id}")
+    public void update(@PathVariable int id, @RequestBody Employee employee){
+        employeeService.update(id, employee);
+    }
+    //Возвращение информации о сотруднике с переданным id;
+    @GetMapping("/{id}")
+    public Employee get(@PathVariable int id) {
+       return employeeService.get(id);
+    }
+    //Удаление сотрудника с переданным id.
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        employeeService.delete(id);
+    }
+    //Метод возвращения всех сотрудников, зарплата которых выше переданного параметра salary.
+    @GetMapping("/salaryHigherThan")
+    public List<Employee> getFindEmployeeSalaryHigherThan(@RequestParam int salary) {
+        return employeeService.getFindEmployeeSalaryHigherThan(salary);
     }
 }

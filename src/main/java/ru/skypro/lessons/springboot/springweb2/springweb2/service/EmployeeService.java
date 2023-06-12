@@ -2,10 +2,13 @@ package ru.skypro.lessons.springboot.springweb2.springweb2.service;
 
 import org.springframework.stereotype.Service;
 import ru.skypro.lessons.springboot.springweb2.springweb2.delo.Employee;
+import ru.skypro.lessons.springboot.springweb2.springweb2.exeption.EmployeeNotFoundExeption;
+import ru.skypro.lessons.springboot.springweb2.springweb2.exeption.EmployeeNotValidExeption;
 import ru.skypro.lessons.springboot.springweb2.springweb2.repository.EmployeeRepository;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
@@ -40,8 +43,47 @@ public class EmployeeService {
                 .mapToInt(Employee::getSalary)
                 .average()
                 .orElse(0D);
+        return getFindEmployeeSalaryHigherThan(average);
+    }
+//  в данном методе сделана валидация (если у сотрудника, которого мы хотим добавить оплата <=0 или имя равно null или не указано, тогда кидается исключение  )
+    public List<Employee> createManyEmployee(List<Employee> employeeList) {
+          Optional<Employee> incorrectEmployee = employeeList.stream()
+                .filter(employee -> employee.getSalary() <= 0 ||
+                        employee.getName() == null || employee.getName().isEmpty())
+                .findFirst();
+
+          if(incorrectEmployee.isPresent()) {
+                throw new EmployeeNotValidExeption(incorrectEmployee.get());
+            }
+          // Тот кто отправляет запрос на создание id не должен управлять id т.е. менять
+        return employeeList.stream()
+                .map(employee -> new Employee(employee.getName(), employee.getSalary()))
+                .map(employeeRepository::add)
+                .collect(Collectors.toList());
+    }
+
+    public void update(int id, Employee employee) {
+        Employee oldEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundExeption(id));
+        oldEmployee.setSalary(employee.getSalary());
+        oldEmployee.setName(employee.getName());
+        employeeRepository.update(id, oldEmployee);
+    }
+
+    public Employee get(int id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundExeption(id));
+    }
+
+    public void delete(int id) {
+        employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundExeption(id));
+        employeeRepository.delete(id);
+    }
+
+    public List<Employee> getFindEmployeeSalaryHigherThan(double salary) {
         return employeeRepository.getAll().stream()
-                .filter(employee -> employee.getSalary() > average)
+                .filter(employee -> employee.getSalary() > salary)
                 .collect(Collectors.toList());
     }
 }

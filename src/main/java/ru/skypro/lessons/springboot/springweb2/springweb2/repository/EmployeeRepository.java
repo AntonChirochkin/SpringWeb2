@@ -5,10 +5,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
 import ru.skypro.lessons.springboot.springweb2.springweb2.delo.Employee;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Repository
 public class EmployeeRepository {
@@ -24,7 +21,44 @@ public class EmployeeRepository {
     public List<Employee> getAll() {
         return Collections.unmodifiableList(employeeList);
     }
-    public void add(Employee employee) {
+
+    public Employee add(Employee employee) {
+
         employeeList.add(employee);
+
+        return employee;
+    }
+
+
+
+    public void update(int id, Employee employee) {
+        int indexForUpdating = findIndexById(id);
+        if (indexForUpdating != -1) {
+            employeeList.set(indexForUpdating, employee);
+        }
+    }
+
+    public Optional<Employee> findById(int id) {
+        return employeeList.stream()
+                .filter(employee -> employee.getId() == id)
+                .findFirst();
+    }
+
+    public void delete(int id) {
+        int indexForRemoving = findIndexById(id);
+        if (indexForRemoving != -1) {
+            employeeList.remove(indexForRemoving);
+        }
+    }
+
+    private int findIndexById(int id) {
+        int index = -1;
+        for (int i = 0; i < employeeList.size(); i++) {
+            if (employeeList.get(i).getId() == id) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }
